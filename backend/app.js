@@ -21,6 +21,10 @@ app.use((req, res, next) => {
 app.get("/places", async (req, res) => {
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
+  // return res.status(500).json();  // for displaying error in available-places.component.ts 
+  // this will call error handled in available-places.component.ts and be displayed in available-places.component.html
+  // when we change something in app.js (or any backend part) we need to npm start again (restart) to apply changes
+
   const fileContent = await fs.readFile("./data/places.json");
 
   const placesData = JSON.parse(fileContent);

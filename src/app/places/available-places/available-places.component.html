@@ -1,7 +1,12 @@
 <app-places-container title="Available Places">
-  @if (isFetching()) {
-    <!-- While data is being fetched (isFetching() === true) thhe message "Fetching available places..." will be displayed. -->
+  @if (isFetching() && !error()) {
+    <!-- While data is being fetched (isFetching() === true) and there are no errors the message "Fetching available places..." will be displayed. -->
     <p class="fallback-text">Fetching available places...</p>
+  }
+
+  @if (error()) {
+    <!--  If the error() signal is set (meaning an error has occurred during the HTTP request), it will display the error message -->
+    <p class="fallback-text">{{ error() }}</p>
   }
 
   @if (places()) {
