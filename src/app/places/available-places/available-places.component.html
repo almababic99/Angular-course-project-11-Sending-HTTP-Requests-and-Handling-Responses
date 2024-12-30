@@ -1,7 +1,14 @@
 <app-places-container title="Available Places">
+  @if (isFetching()) {
+    <!-- While data is being fetched (isFetching() === true) thhe message "Fetching available places..." will be displayed. -->
+    <p class="fallback-text">Fetching available places...</p>
+  }
+
   @if (places()) {
-  <app-places [places]="places()!" />
+    <!-- Once data has been fetched (if places()) the app-places component will be rendered, passing the fetched places() data to it. -->
+    <app-places [places]="places()!" />
   } @else if (places()?.length === 0) {
-  <p class="fallback-text">Unfortunately, no places could be found.</p>
+    <!-- If places() is an empty array the message "Unfortunately, no places could be found." will be shown to the user. -->
+    <p class="fallback-text">Unfortunately, no places could be found.</p>
   }
 </app-places-container>
