@@ -11,7 +11,10 @@
 
   @if (places()) {
     <!-- Once data has been fetched (if places()) the app-places component will be rendered, passing the fetched places() data to it. -->
-    <app-places [places]="places()!" />
+    <app-places [places]="places()!" (selectPlace)="onSelectPlace($event)" />
+    <!-- (selectPlace) is an event that is being emitted by the app-places component. -->
+    <!-- The value onSelectPlace($event) refers to a method onSelectPlace in the parent component (which is AvailablePlacesComponent in this case) 
+     that will be called whenever the selectPlace event is emitted by the app-places component. $event represents the data passed by the selectPlace event. -->
   } @else if (places()?.length === 0) {
     <!-- If places() is an empty array the message "Unfortunately, no places could be found." will be shown to the user. -->
     <p class="fallback-text">Unfortunately, no places could be found.</p>

@@ -20,7 +20,7 @@ export class AvailablePlacesComponent implements OnInit {
   // isFetching is used to represent whether data is being fetched from the backend.
   // It will be set to true when the data is being loaded, and false when the request completes.
 
-  error = signal('');   // error is a signal used to store potential error
+  error = signal(''); // error is a signal used to store potential error
 
   private httpClient = inject(HttpClient);
   // HttpClient is used to make HTTP requests (GET, POST, etc.).
@@ -45,18 +45,20 @@ export class AvailablePlacesComponent implements OnInit {
         // The pipe() function is used to chain multiple RxJS operators together to manipulate the data that an observable emits.
         map((resData) => resData.places),
         // map() operator is an RxJS operator that transforms the data from the response. It extracts the places array from the response (resData.places).
-        catchError((error) => {  // catchError is an RxJS operator that catches any errors that occur within the observable stream and handles them.
+        catchError((error) => {
+          // catchError is an RxJS operator that catches any errors that occur within the observable stream and handles them.
           // If an error happens during the HTTP request (like network failure, server issue, or a bad response), the catchError operator is invoked.
-          console.log(error);  // The error is logged to the console for debugging purposes.
-          return throwError(   // throwError is a method used to propagate a new error message to the subscriber. It returns an observable that emits an error.
+          console.log(error); // The error is logged to the console for debugging purposes.
+          return throwError(
+            // throwError is a method used to propagate a new error message to the subscriber. It returns an observable that emits an error.
             () =>
               new Error(
                 'Something went wrong fetching the available places. Please try again later.'
               )
-              // The error message that's thrown is a custom message: 'Something went wrong fetching the available places. Please try again later.'
-              // This is the message the component will use for the UI.
-              // This is displayed in available-places.component.html if the error occurs.
-              // To get the error to display we can change app.js in backend folder (app.get("/places"))
+            // The error message that's thrown is a custom message: 'Something went wrong fetching the available places. Please try again later.'
+            // This is the message the component will use for the UI.
+            // This is displayed in available-places.component.html if the error occurs.
+            // To get the error to display we can change app.js in backend folder (app.get("/places"))
           );
         })
       )
@@ -70,11 +72,11 @@ export class AvailablePlacesComponent implements OnInit {
           // The next function updates the places signal with the fetched data, which causes the component's UI to automatically update.
           this.places.set(places);
         },
-        error: (error: Error) => {  
-          // This is the error callback. If the observable emits an error (which can be thrown either by catchError or directly from the HTTP 
+        error: (error: Error) => {
+          // This is the error callback. If the observable emits an error (which can be thrown either by catchError or directly from the HTTP
           // request), this part of the subscribe block will be triggered.
           this.error.set(error.message);
-          // The message property of the error is extracted and stored in the error signal. This signal can be used later in the component's 
+          // The message property of the error is extracted and stored in the error signal. This signal can be used later in the component's
           // template to display the error message to the user (e.g., "Something went wrong fetching the available places. Please try again later.").
         },
         complete: () => {
@@ -87,5 +89,21 @@ export class AvailablePlacesComponent implements OnInit {
       subscription.unsubscribe();
       // This ensures that when the component is destroyed, the HTTP subscription is properly cleaned up (unsubscribed) to avoid memory leaks.
     });
+  }
+
+  onSelectPlace(selectedPlace: Place) {  // this method is triggered when a user selects a place. 
+    // This method is responsible for sending a PUT request to the backend server when a user selects a place. 
+    // When a user selects a place, the component emits the selectPlace event, passing the selected Place object. 
+    // The onSelectPlace method is then triggered, which handles the event.
+    this.httpClient
+      .put('http://localhost:3000/user-places', {  
+        placeId: selectedPlace.id,
+        // This makes an HTTP PUT request to the server at http://localhost:3000/user-places with the selected place's id.
+        // The request body contains the placeId property, which holds the ID of the selected place (selectedPlace.id).
+        // A PUT request is typically used for updating an existing resource on the server. 
+      })
+      .subscribe({ // Since httpClient.put() returns an Observable, you must subscribe to it in order to actually trigger the request and receive the response.
+        next: (resData) => console.log(resData),
+      });
   }
 }
