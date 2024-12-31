@@ -69,7 +69,7 @@ export class AvailablePlacesComponent implements OnInit {
     // When a user selects a place, the component emits the selectPlace event, passing the selected Place object.
     // The onSelectPlace method is then triggered, which handles the event.
     const subscription = this.placesService  // using a placesService service to add data
-      .addPlaceToUserPlaces(selectedPlace.id)
+      .addPlaceToUserPlaces(selectedPlace)
       .subscribe({
         // Since httpClient.put() returns an Observable, you must subscribe to it in order to actually trigger the request and receive the response.
         next: (resData) => console.log(resData),

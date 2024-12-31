@@ -15,8 +15,8 @@ import { PlacesService } from '../places.service';
   imports: [PlacesContainerComponent, PlacesComponent],
 })
 export class UserPlacesComponent implements OnInit {
-  places = signal<Place[] | undefined>(undefined); // A signal to hold an array of Place objects, initially undefined but later it will hold an array of Place objects (coming from the backend).
-
+  // places = signal<Place[] | undefined>(undefined); // A signal to hold an array of Place objects, initially undefined but later it will hold an array of Place objects (coming from the backend).
+  
   isFetching = signal(false); // A signal that holds a boolean value (false initially).
   // isFetching is used to represent whether data is being fetched from the backend.
   // It will be set to true when the data is being loaded, and false when the request completes.
@@ -26,6 +26,13 @@ export class UserPlacesComponent implements OnInit {
   private placesService = inject(PlacesService); // this allows the PlacesService to be injected and available for use inside the component
 
   private destroyRef = inject(DestroyRef); // DestroyRef is injected to handle cleanup logic when the component is destroyed
+
+  places = this.placesService.loadedUserPlaces;
+  // this.placesService: This refers to an instance of the PlacesService that has been injected into the current component or service. 
+  // PlacesService is responsible for managing places data and providing methods to load, add, and remove places.
+  // loadedUserPlaces: This is a readonly signal defined in the PlacesService
+  // places is being set to the readonly signal of the user places from the PlacesService.
+  // It makes the places variable in the current component reactive, so it will automatically update whenever loadedUserPlaces in the service changes.
 
   ngOnInit() {
     // ngOnInit() is a lifecycle hook that's called once the component is initialized.
@@ -38,12 +45,12 @@ export class UserPlacesComponent implements OnInit {
       // The subscribe() method subscribes to the observable returned by the httpClient.get().
       // Once you've set up your observable and applied any necessary transformations using pipe(), you need to
       // subscribe to the observable to start receiving values.
-      next: (places) => {
-        //  The next function is called each time the observable emits a new value.
-        // After the data is fetched and transformed by map(), the next function is called with the places array.
-        // The next function updates the places signal with the fetched data, which causes the component's UI to automatically update.
-        this.places.set(places);
-      },
+      // next: (places) => {
+      //   //  The next function is called each time the observable emits a new value.
+      //   // After the data is fetched and transformed by map(), the next function is called with the places array.
+      //   // The next function updates the places signal with the fetched data, which causes the component's UI to automatically update.
+      //   this.places.set(places);
+      // },
       error: (error: Error) => {
         // This is the error callback. If the observable emits an error (which can be thrown either by catchError or directly from the HTTP
         // request), this part of the subscribe block will be triggered.

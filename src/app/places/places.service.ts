@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 
 import { Place } from './place.model';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, throwError } from 'rxjs';
+import { catchError, map, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -34,17 +34,44 @@ export class PlacesService {
       'Something went wrong fetching your favorite places. Please try again later.'
       // It calls the fetchPlaces method below and provides the URL (http://localhost:3000/user-places) to fetch data from and 
       // an error message in case something goes wrong.
-    );
+    ).pipe(tap({
+      next: (userPlaces) => this.userPlaces.set(userPlaces)
+      // The pipe operator is a function from RxJS that is used to chain multiple operators together in an observable stream. 
+      // It allows you to transform, handle errors, and perform other operations on the data emitted by an observable.
+      // The tap operator is another RxJS operator used to perform side effects when the observable emits a value. 
+      // It doesn't modify the emitted value—it just allows you to do something with it, such as logging, updating the UI, 
+      // or in this case, updating the state.
+    }));
   }
 
-  addPlaceToUserPlaces(placeId: string) {  // This method sends a PUT request to the backend to add a place to the user's favorite places list.
+  addPlaceToUserPlaces(place: Place) {  // This method sends a PUT request to the backend to add a place to the user's favorite places list.
+    // optimistic updating:
+    const prevPlaces = this.userPlaces();
+    // prevPlaces is the current list of places from the userPlaces signal (before adding a new place)
+
+    // Checking whether the place to be added already exists in the list. This avoids duplicates:
+    if (!prevPlaces.some((p) => p.id === place.id)) {
+      // If the place isn’t already in the list, you optimistically update the UI by appending the new place to the userPlaces signal. 
+      // This change will immediately reflect in the UI without waiting for the backend response.
+      this.userPlaces.set([...prevPlaces, place]);
+    }
+    
+    // This sends a PUT request to the backend with the placeId of the place to be added to the user's favorites. This updates the server-side data:
     return this.httpClient
     .put('http://localhost:3000/user-places', {
-      placeId,
+      placeId: place.id,
       // This makes an HTTP PUT request to the server at http://localhost:3000/user-places with the selected place's id.
       // The request body contains the placeId property, which holds the ID of the selected place (placeId).
       // A PUT request is typically used for updating an existing resource on the server.
-    })
+    }).pipe(
+      catchError(error => {  // The catchError operator is used to handle errors that might occur during the HTTP request.
+        // If the request fails (e.g., network error, server error), the optimistic update made to the userPlaces signal is rolled back 
+        // by resetting the userPlaces signal back to prevPlaces (the state before the optimistic update):
+        this.userPlaces.set(prevPlaces);
+        // The error is propagated with a custom error message:
+        return throwError(() => new Error('Failed to store selected place.'))
+      })
+    );
   }
 
   removeUserPlace(place: Place) {}
