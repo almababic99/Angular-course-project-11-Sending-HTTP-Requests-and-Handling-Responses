@@ -69,4 +69,15 @@ export class UserPlacesComponent implements OnInit {
       // This ensures that when the component is destroyed, the HTTP subscription is properly cleaned up (unsubscribed) to avoid memory leaks.
     });
   }
+
+  onRemovePlace(place: Place) {
+    const subscription = this.placesService.removeUserPlace(place).subscribe();
+    // calling a funciton from places.service.ts to remove a place
+
+    this.destroyRef.onDestroy(() => {
+      // onDestroy() is a lifecycle hook that cleans up resources (like HTTP requests) when the component is destroyed to avoid memory leaks.
+      subscription.unsubscribe();
+      // This ensures that when the component is destroyed, the HTTP subscription is properly cleaned up (unsubscribed) to avoid memory leaks.
+    });
+  }
 }
