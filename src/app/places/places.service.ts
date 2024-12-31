@@ -3,11 +3,15 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Place } from './place.model';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, tap, throwError } from 'rxjs';
+import { ErrorService } from '../shared/error.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlacesService {
+  private errorService = inject(ErrorService);
+  // injecting ErrorService in PlacesService so we can use it here and catch errors
+
   private httpClient = inject(HttpClient);
   // HttpClient is used to make HTTP requests (GET, POST, etc.).
   // The inject function is being used to inject the HttpClient service directly into the httpClient property of the AvailablePlacesComponent.
@@ -68,6 +72,11 @@ export class PlacesService {
         // If the request fails (e.g., network error, server error), the optimistic update made to the userPlaces signal is rolled back 
         // by resetting the userPlaces signal back to prevPlaces (the state before the optimistic update):
         this.userPlaces.set(prevPlaces);
+
+        this.errorService.showError('Failed to store selected place.'); 
+        // This is used to display an error message to the user when something goes wrong with the operation 
+        // (in this case, when the PUT request to add the place fails).
+        
         // The error is propagated with a custom error message:
         return throwError(() => new Error('Failed to store selected place.'))
       })
